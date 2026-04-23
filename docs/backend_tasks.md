@@ -6,13 +6,13 @@
 
 ## Day 1 — Setup + Dataset
 
-- [ ] 1. Set up project structure
+- [x] 1. Set up project structure
   - Create `backend/` directory layout (utils/, models/, scripts/, data/)
   - Write `requirements.txt` (fastapi, uvicorn, opencv-python, torch, torchvision, faiss-cpu, sqlite3)
   - Create `main.py` with FastAPI app skeleton and `GET /health` endpoint
   - Set up GCS client config and service account env handling
 
-- [ ] 2. Collect dataset
+- [x] 2. Collect dataset
   - Install `yt-dlp`, download 3–5 sports clips (≤480p)
   - Run `scripts/make_variants.sh` to generate variants per clip:
     - Trimmed (`ffmpeg -ss 10 -t 30`)

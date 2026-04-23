@@ -6,7 +6,7 @@ This implementation plan converts the visual fingerprinting system design into a
 
 ## Tasks
 
-- [ ] 1. Set up project structure and core dependencies
+- [x] 1. Set up project structure and core dependencies
   - Create backend directory structure with FastAPI project
   - Set up requirements.txt with core dependencies (FastAPI, OpenCV, PyTorch, FAISS, SQLite)
   - Create main.py with basic FastAPI app and health endpoint
@@ -55,7 +55,7 @@ This implementation plan converts the visual fingerprinting system design into a
   - [ ]* 4.2 Write property test for similarity score bounds
     - **Property 3: Similarity Score Bounds**
     - **Validates: All similarity scores are between 0.0 and 1.0**
-    - _Requirements: Similarity scores must be valid cosine similarity values_
+    - _Requirements: Similarity sc3ores must be valid cosine similarity values_
 
 - [ ] 5. Checkpoint - Core pipeline validation
   - Ensure frame extraction, embedding generation, and FAISS query work together
