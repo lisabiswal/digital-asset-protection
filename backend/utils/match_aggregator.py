@@ -98,13 +98,17 @@ def aggregate_matches(faiss_results: List[List[Dict]], total_query_frames: int) 
         start_sec = matched_query_frames[0]
         end_sec = matched_query_frames[-1]
         
-        meta = metadata_map.get(vid, {})
+        meta = metadata_map.get(vid, {}) or {}
+
+        thumbnail_url = meta.get("thumbnail_url") or ""
+        youtube_url = meta.get("youtube_url") or ""
+        title = meta.get("title") or vid
         
         aggregated_results.append({
             "video_id": vid,
-            "title": meta.get("title", vid),
-            "thumbnail_url": meta.get("thumbnail_url", ""),
-            "youtube_url": meta.get("youtube_url", ""),
+            "title": title,
+            "thumbnail_url": thumbnail_url,
+            "youtube_url": youtube_url,
             "similarity_score": float(avg_score),
             "confidence": label,
             "confidence_score": float(confidence_score),

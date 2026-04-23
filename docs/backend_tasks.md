@@ -44,36 +44,36 @@
 
 ## Day 3 — FAISS + Matching
 
-- [ ] 5. Dataset indexer (`scripts/build_index.py`)
+- [x] 5. Dataset indexer (`scripts/build_index.py`)
   - For each video in `data/raw/`: extract frames → generate embeddings
   - Build `faiss.IndexFlatIP` index, add all embeddings
   - Save `data/index.faiss` and `data/meta.db` (SQLite: videos table)
   - Store `faiss_start_idx / faiss_end_idx` per video in SQLite
 
-- [ ] 6. FAISS index module (`utils/faiss_index.py`)
+- [x] 6. FAISS index module (`utils/faiss_index.py`)
   - `FAISSIndex` class: load from disk, `query(embedding, k=10)`
   - Returns `[(video_id, frame_idx, score)]`
 
-- [ ] 6.2* Property test — similarity score bounds
+- [x] 6.2* Property test — similarity score bounds
   - Assert all returned scores are in `[0.0, 1.0]`
 
-- [ ] 7. Match aggregator (`utils/match_aggregator.py`)
+- [x] 7. Match aggregator (`utils/match_aggregator.py`)
   - Group FAISS results by `video_id`
   - Compute `match_ratio = matched_frames / total_query_frames`
   - Compute `confidence = match_ratio × avg_similarity`
   - Label: strong ≥ 0.6, partial 0.3–0.6, weak < 0.3
   - Return top 5 ranked by confidence
 
-- [ ] 7.2* Property test — confidence thresholds
+- [x] 7.2* Property test — confidence thresholds
   - Assert confidence labels match expected thresholds
 
-- [ ] 8. Core API endpoints
+- [x] 8. Core API endpoints
   - `POST /upload` — validate file, save to GCS, return `upload_id`
   - `POST /process/{upload_id}` — extract frames + embeddings, store in-memory/temp
   - `POST /scan` — run FAISS query + aggregation, store results
   - `GET /matches?upload_id=X` — return ranked matches JSON
 
-- [ ] **Checkpoint:** Full pipeline works locally. Upload → process → scan → results returns real data.
+- [x] **Checkpoint:** Full pipeline works locally. Upload → process → scan → results returns real data.
 
 ---
 
