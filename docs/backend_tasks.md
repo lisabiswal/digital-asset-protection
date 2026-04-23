@@ -25,7 +25,7 @@
 
 ## Day 2 — Fingerprinting Pipeline
 
-- [ ] 3. Frame extraction (`utils/frames.py`)
+- [x] 3. Frame extraction (`utils/frames.py`)
   - `extract_frames(video_path) -> List[np.ndarray]` at 1fps
   - Return metadata: `{duration_secs, frame_count}`
   - Handle corrupted/unreadable videos gracefully

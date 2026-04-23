@@ -41,3 +41,5 @@ scripts/downloaded_videos/
 
 # --- Docker ---
 .dockerignore
+
+Key.json
