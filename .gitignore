@@ -1,0 +1,43 @@
+# --- General ---
+.DS_Store
+.env
+.env.local
+*.log
+__pycache__/
+.vscode/
+.idea/
+
+# --- Backend (Python/FastAPI) ---
+venv/
+env/
+.venv/
+*.py[cod]
+*$py.class
+.pytest_cache/
+backend/data/raw/
+backend/data/uploads/
+
+# --- FAISS & Database (Exclude large/local binary data) ---
+# Note: Keep meta.db/index.faiss if you MUST bundle them, 
+# but usually it's better to ignore and download from GCS.
+backend/data/*.faiss
+backend/data/*.db
+backend/data/*.sqlite3
+
+# --- Frontend (Node/React) ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.eslintcache
+frontend/coverage/
+frontend/stats.json
+
+# --- Scripts & Tools ---
+scripts/downloaded_videos/
+*.mp4
+*.mkv
+*.avi
+*.mov
+
+# --- Docker ---
+.dockerignore
