@@ -30,14 +30,14 @@
   - Return metadata: `{duration_secs, frame_count}`
   - Handle corrupted/unreadable videos gracefully
 
-- [ ] 4. CNN embeddings (`utils/embeddings.py`)
+- [x] 4. CNN embeddings (`utils/embeddings.py`)
   - Load MobileNetV2 pretrained (torchvision), strip classifier head
   - `generate_embedding(frame: np.ndarray) -> np.ndarray` → 1280-dim
   - Preprocess: resize 224×224, normalize with ImageNet stats
   - L2-normalize output for cosine similarity
   - `generate_embeddings_batch(frames) -> np.ndarray`
 
-- [ ] 4.2* Property test — embedding normalization
+- [x] 4.2* Property test — embedding normalization
   - Assert `np.linalg.norm(embedding) ≈ 1.0` and `embedding.shape == (1280,)`
 
 ---
