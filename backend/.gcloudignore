@@ -1,0 +1,19 @@
+# Exclude large raw video data to speed up Cloud Build upload
+data/raw/
+data/uploads/
+
+# Exclude local environment files
+.env
+key.json
+
+# Exclude Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Exclude git
+.git/
+
+# Exclude local venv
+.venv/
+env/

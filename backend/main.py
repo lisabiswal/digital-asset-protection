@@ -2,11 +2,11 @@ import os
 import uuid
 import logging
 import shutil
+import textwrap
 import numpy as np
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from google.cloud import storage
 
 from models.schemas import (
     HealthResponse, UploadResponse, ProcessResponse, 
@@ -16,6 +16,8 @@ from utils.frames import extract_frames
 from utils.embeddings import get_embedding_generator
 from utils.faiss_index import get_faiss_index
 from utils.match_aggregator import aggregate_matches
+from utils.gcs import get_gcs_manager
+from utils.db import get_db_manager
 
 # Load environment variables
 load_dotenv()
@@ -24,9 +26,41 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Digital Asset Protection API")
+description_text = textwrap.dedent("""
+## Quick Start (Judge Instructions)
 
-# CORS Configuration
+This system detects unauthorized sports media by comparing video fingerprints.
+
+### Steps to Test
+
+1. **Upload a video**
+   - Endpoint: `POST /upload`
+   - Action: Upload a sample clip
+   - Output: Returns `upload_id`
+
+2. **Process the video**
+   - Endpoint: `POST /process/{upload_id}`
+   - Action: Generate fingerprints for the uploaded video
+
+3. **Scan for matches**
+   - Endpoint: `POST /scan`
+   - Body:
+     {
+       "upload_id": "<your_upload_id>"
+     }
+
+4. **View results**
+   - Endpoint: `GET /matches?upload_id=<your_upload_id>`
+   - Output: Returns matched videos with similarity scores
+
+""")
+
+app = FastAPI(
+    title="🛡️ Sports Asset Protection System",
+    description=description_text,
+    version="1.0.0"
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,36 +69,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# GCS Configuration
-GCS_BUCKET = os.getenv("GCS_BUCKET", "sports-media-guard-demo")
-GCS_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-
-# In-memory storage for prototype
-# In production, use Redis or a Database
-STORAGE_DIR = "backend/data/uploads"
-os.makedirs(STORAGE_DIR, exist_ok=True)
-
+# In-memory storage for prototype session state
+# In production, use Redis
 processed_data = {} # upload_id -> { embeddings: np.ndarray, frame_count: int }
 scan_results = {}   # upload_id -> List[MatchResult]
 
-def get_gcs_client():
-    try:
-        if GCS_CREDENTIALS and os.path.exists(GCS_CREDENTIALS):
-            return storage.Client.from_service_account_json(GCS_CREDENTIALS)
-        return storage.Client()
-    except Exception as e:
-        logger.warning(f"GCS client could not be initialized: {e}")
-        return None
-
-gcs_client = get_gcs_client()
+# Local directory for temporary storage
+STORAGE_DIR = "backend/data/uploads"
+os.makedirs(STORAGE_DIR, exist_ok=True)
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     faiss_idx = get_faiss_index()
+    gcs = get_gcs_manager()
     return {
         "status": "healthy",
-        "gcs_initialized": gcs_client is not None,
-        "bucket": GCS_BUCKET,
+        "gcs_initialized": gcs.client is not None,
+        "bucket": gcs.bucket_name,
         "index_loaded": faiss_idx.index is not None,
         "dataset_size": faiss_idx.index.ntotal if faiss_idx.index else 0
     }
@@ -73,21 +94,21 @@ async def health_check():
 async def upload_video(file: UploadFile = File(...)):
     upload_id = str(uuid.uuid4())
     file_extension = file.filename.split(".")[-1]
-    file_path = os.path.join(STORAGE_DIR, f"{upload_id}.{file_extension}")
+    local_path = os.path.join(STORAGE_DIR, f"{upload_id}.{file_extension}")
     
     try:
-        with open(file_path, "wb") as buffer:
+        # 1. Save locally first
+        with open(local_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
-        logger.info(f"File uploaded successfully: {file_path}")
-        
-        # GCS Upload Path (Mock for now, logic in Day 4)
-        gcs_path = f"gs://{GCS_BUCKET}/uploads/{upload_id}.{file_extension}"
+        # 2. Upload to GCS in the background (or foreground for hackathon simplicity)
+        gcs = get_gcs_manager()
+        gcs_uri = gcs.upload_video(local_path, upload_id)
         
         return {
             "upload_id": upload_id,
             "status": "uploaded",
-            "gcs_path": gcs_path
+            "gcs_path": gcs_uri
         }
     except Exception as e:
         logger.error(f"Upload failed: {e}")
@@ -173,4 +194,5 @@ async def get_matches(upload_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Use 8080 for Cloud Run compatibility
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
